@@ -1,0 +1,86 @@
+print('Какой турнир вы хотите выбрать?\n 1-Российская премьер лига,2-USA MLS')
+n=int(input())
+if n==1:
+    t='RUS.csv'
+else:
+    t='USA.csv'
+import pandas as pd
+from operator import itemgetter, attrgetter, methodcaller
+unik_teams=[]
+a=['Team Name','Number of games played','Number of wins','Number of draws','Number of losses','Goal difference','Points','Ranking place']
+df = pd.read_csv(t)
+df.drop(['Res', 'PH','PD','PA','MaxH','MaxD','MaxA','AvgH','AvgD','AvgA'], axis='columns', inplace=True)#чистим датасет
+print(df)
+def given_name(team):
+    X_team=df[(df['Home'].str.contains(team) | df['Away'].str.contains(team))]
+    return(X_team)
+def given_date(date):
+    date.replace('.','/')
+    Y_maches=df[(df['Date'].str.contains(date))]
+    return(Y_maches)
+print(given_date('21/07/2012'))
+for index, row in df.iterrows():
+    print(index, row)
+    if [row['Home']] not in unik_teams:
+        unik_teams.append([row['Home']])
+    if [row['Away']] not in unik_teams:
+        unik_teams.append([row['Away']])
+for i in unik_teams:
+    i.append(0)#games played(i[0]-team name)    1
+    i.append(0)#wins    2
+    i.append(0)#draws   3
+    i.append(0)#loses   4
+    i.append(0)#diiference  5
+    i.append(0)#poits   6
+    i.append(0)#place   7
+    i.append(0)#goals 8 
+print(unik_teams)
+for index, row in df.iterrows():
+    print(index, row)
+    for i in unik_teams:
+        if (row['Home']==i[0] or row['Away']==i[0]):#количество сыгранных матчей
+            i[1]=i[1]+1
+        if row['Home']==i[0] and row['HG']>row['AG']:#победы
+            i[2]=i[2]+1
+            i[5]=i[5]+row['HG']-row['AG']#difference
+            i[8]=i[8]+row['HG']
+        if row['Away']==i[0] and row['AG']>row['HG']:#победы
+            i[2]=i[2]+1
+            i[5]=i[5]+row['AG']-row['HG']#difference
+            i[8]=i[8]+row['AG']
+        if ((row['Away']==i[0] or row['Home']==i[0]) and (row['AG']==row['HG'])):#ничьи
+            i[3]=i[3]+1
+        if row['Away']==i[0] and row['AG']<row['HG']:#поражения,можно было посчитать как матчи-победы-ничьи
+            i[4]=i[4]+1
+            i[5]=i[5]+row['AG']-row['HG']#difference
+            i[8]=i[8]+row['AG']
+        if row['Home']==i[0] and row['HG']<row['AG']:#поражения,можно было посчитать как матчи-победы-ничьи
+            i[5]=i[5]+row['HG']-row['AG']#difference
+            i[4]=i[4]+1
+            i[8]=i[8]+row['HG']
+        #для ничей differece всегда=0
+        #формирование списков закончено,щас будем делать поинты и расставлять по местам сортировкой
+for i in unik_teams:
+    i[6]=i[2]*3+i[3]#начисляем поинты по нашим правилам
+s = sorted(unik_teams, key=itemgetter(6),reverse=True)#вначале сортируем по очкам
+sorted(s,key=itemgetter(5),reverse=True)#потом по разности пропущенных и забытых голов
+sorted(s,key=itemgetter(8),reverse=True)#потом по количеству забитых голов
+for i in  range (len(s)):
+    s[i][7]=i+1
+s.insert(0,a)
+for i in range(1,len(s)):
+    for k in range(i,len(s)):
+        if (s[i][6]==s[k][6] and s[i][8]==s[k][8]):#если так произошло что кол-во голов и поинты одинаковые, приравниваем место в таблице
+            t=s[i][7]
+            s[k][7]=t
+for i in range(len(s)-1):
+    if s[i][7]==s[i+1][7]:
+        for k in range(i+2,len(s)):
+            s[k][7]=s[k][7]-1
+print(s)
+for row in s:
+    for elem in row:
+        print(elem, end=' ')
+    print()
+dt=pd.DataFrame(s)
+dt.to_csv('filename4task2U9.csv', index=False)
