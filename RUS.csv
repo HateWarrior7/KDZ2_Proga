@@ -9,6 +9,7 @@ def given_name(team):
     X_team=df[(df['Home'].str.contains(team) | df['Away'].str.contains(team))]
     return(X_team)
 def given_date(date):
+    date.replace('.','/')
     Y_maches=df[(df['Date'].str.contains(date))]
     return(Y_maches)
 print(given_date('21/07/2012'))
