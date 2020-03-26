@@ -78,9 +78,6 @@ for i in range(len(s)-1):
         for k in range(i+2,len(s)):
             s[k][7]=s[k][7]-1
 print(s)
-for row in s:
-    for elem in row:
-        print(elem, end=' ')
-    print()
 dt=pd.DataFrame(s)
 dt.to_csv('filename4task2U9.csv', index=False)
+#ВСЕ БУДЕТ В CSV ФАЙЛЕ НА КОМПЕ,ОН НАЗЫВАЕТСЯ filename4task2U9.csv
